@@ -3,17 +3,16 @@
 
 .cseg	
 	call lcd_init
-	call lcd_clr
 	call str_cpy
 	call init_pointers
-	
+lp:	
 	call lcd_clr
-	;call display_lines
+	call display_lines
 	call fill_lines
 	call display_lines
 	;call move_pointers
 	call delay
-lp:	jmp lp
+	jmp lp
 move_pointers:
 	
 	ret
@@ -41,14 +40,16 @@ del3:	nop
 display_lines:
 	;saved regs
 	push r16
-	;line 1
+
+	;line 1 xy
 	ldi r16, 0x00
 	push r16
+	ldi r16, 0x00
 	push r16
 	call lcd_gotoxy
 	pop r16
 	pop r16
-	;message 1
+	;message 1 display
 	ldi r16, high(line1)
 	push r16
 	ldi r16, low(line1)
@@ -56,7 +57,8 @@ display_lines:
 	call lcd_puts
 	pop r16
 	pop r16
-	;line 2
+
+	;line 2 xy
 	ldi r16, 0x01
 	push r16
 	ldi r16, 0x00
@@ -64,7 +66,7 @@ display_lines:
 	call lcd_gotoxy
 	pop r16
 	pop r16
-	;message 2
+	;message 2 display
 	ldi r16, high(line2)
 	push r16
 	ldi r16, low(line2)
@@ -72,6 +74,7 @@ display_lines:
 	call lcd_puts
 	pop r16
 	pop r16
+
 	;popping saved regs
 	pop r16
 	ret
@@ -92,14 +95,32 @@ fill_lines:
 	ldi XH, high(line1)
 	ldi XL, low(line1)
 	ldi r17, 0x10
-load:
+load1:
 	cpi r17, 0x00
-	breq add_null
+	breq add_null1
 	dec r17
 	ld r16, Y+
 	st X+, r16
-	jmp load
-add_null:
+	jmp load1
+add_null1:
+	ldi r16, 0x00
+	st X, r16
+	;line 2
+	ldi XH, high(l2ptr)
+	ldi XL, low(l2ptr)
+	ld YH, X+
+	ld YL, X
+	ldi XH, high(line2)
+	ldi XL, low(line2)
+	ldi r17, 0x10
+load2:
+	cpi r17, 0x00
+	breq add_null2
+	dec r17
+	ld r16, Y+
+	st X+, r16
+	jmp load2
+add_null2:
 	ldi r16, 0x00
 	st X, r16
 	pop r17
