@@ -13,6 +13,7 @@ lp:
 	call move_pointers
 	call delay
 	jmp lp
+
 move_pointers:
 	push XH
 	push XL
@@ -28,15 +29,15 @@ move_pointers:
 	ld YL, X  ;low byte
 	ldi XH, high(l1ptr)
 	ldi XL, low(l1ptr)
-	ldd r18, Y+16
+	ld r18, Y
 	cpi r18, 0x00
-	brne dont_wrap
+	brne dont_wrap1
 	ldi r16, high(msg1)
 	ldi r17, low(msg1)
 	st X+, r16
 	st X, r17
 	jmp inc_line2
-dont_wrap:
+dont_wrap1:
 	mov r17, YL
 	mov r16, YH
 	inc r17
@@ -49,10 +50,21 @@ skip1:
 inc_line2:
 	ldi XH, high(l2ptr)
 	ldi XL, low(l2ptr)
-	ld r16, X+ ;high byte
-	ld r17, X  ;low byte
+	ld YH, X+ ;high byte
+	ld YL, X  ;low byte
 	ldi XH, high(l2ptr)
 	ldi XL, low(l2ptr)
+	ld r18, Y
+	cpi r18, 0x00
+	brne dont_wrap2
+	ldi r16, high(msg2)
+	ldi r17, low(msg2)
+	st X+, r16
+	st X, r17
+	jmp do_pop
+dont_wrap2:
+	mov r17, YL
+	mov r16, YH
 	inc r17
 	brne skip2
 	inc r16
