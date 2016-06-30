@@ -10,17 +10,70 @@ lp:
 	call display_lines
 	call fill_lines
 	call display_lines
-	;call move_pointers
+	call move_pointers
 	call delay
 	jmp lp
 move_pointers:
-	
+	push XH
+	push XL
+	push YH
+	push YL
+	push r16
+	push r17
+	push r18
+	;incrementing first pointer
+	ldi XH, high(l1ptr)
+	ldi XL, low(l1ptr)
+	ld YH, X+ ;high byte
+	ld YL, X  ;low byte
+	ldi XH, high(l1ptr)
+	ldi XL, low(l1ptr)
+	ldd r18, Y+16
+	cpi r18, 0x00
+	brne dont_wrap
+	ldi r16, high(msg1)
+	ldi r17, low(msg1)
+	st X+, r16
+	st X, r17
+	jmp inc_line2
+dont_wrap:
+	mov r17, YL
+	mov r16, YH
+	inc r17
+	brne skip1
+	inc r16
+skip1:
+	st X+, r16
+	st X, r17
+	;incrementing second pointer
+inc_line2:
+	ldi XH, high(l2ptr)
+	ldi XL, low(l2ptr)
+	ld r16, X+ ;high byte
+	ld r17, X  ;low byte
+	ldi XH, high(l2ptr)
+	ldi XL, low(l2ptr)
+	inc r17
+	brne skip2
+	inc r16
+skip2:
+	st X+, r16
+	st X, r17
+do_pop:
+	pop r18
+	pop r17
+	pop r16
+	pop YL
+	pop YH
+	pop XL
+	pop XH
 	ret
+
 delay:
 	push r20
 	push r21
 	push r22
-	ldi r20, 0x20
+	ldi r20, 0x2A
 del1:	nop
 		ldi r21,0xFF
 del2:	nop
