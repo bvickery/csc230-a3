@@ -1,7 +1,9 @@
 #define LCD_LIBONLY
 .include "lcd.asm"
 
-.cseg	
+.cseg
+
+	sei	
 	call lcd_init
 	call str_cpy
 	call init_pointers
@@ -85,7 +87,7 @@ delay:
 	push r20
 	push r21
 	push r22
-	ldi r20, 0x2A
+	ldi r20, 0x25
 del1:	nop
 		ldi r21,0xFF
 del2:	nop
@@ -143,7 +145,7 @@ display_lines:
 	;popping saved regs
 	pop r16
 	ret
-
+;as loading in the values check each one and if zero then do the wrap there
 fill_lines:
 	;saved regs
 	push XH
@@ -165,6 +167,14 @@ load1:
 	breq add_null1
 	dec r17
 	ld r16, Y+
+	cpi r16, 0x00
+	breq wrap1
+	st X+, r16
+	jmp load1
+wrap1:
+	ldi YH, high(msg1)
+	ldi YL, low(msg1)
+	ld r16, Y+
 	st X+, r16
 	jmp load1
 add_null1:
@@ -182,6 +192,14 @@ load2:
 	cpi r17, 0x00
 	breq add_null2
 	dec r17
+	ld r16, Y+
+	cpi r16, 0x00
+	breq wrap2
+	st X+, r16
+	jmp load2
+wrap2:
+	ldi YH, high(msg2)
+	ldi YL, low(msg2)
 	ld r16, Y+
 	st X+, r16
 	jmp load2
@@ -257,8 +275,8 @@ str_cpy:
 	pop r16
 	ret
 
-msg1_p:	.db "This is whats being put on line 1", 0	
-msg2_p: .db "This is whats being put on line 2", 0
+msg1_p:	.db "This is whats being put on line 1 ", 0	
+msg2_p: .db "wubbalubbadubdub thats a thing i say now remember i said it at the end of last episode ", 0
 
 .dseg
 msg1: .byte 200
